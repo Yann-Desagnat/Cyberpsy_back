@@ -10,7 +10,7 @@ import com.cyberpsy.interfaces.UtilisateurRepository;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/utilisateurs")
+@RequestMapping("/api/auth/register")
 public class UtilisateurController {
 
     @Autowired
