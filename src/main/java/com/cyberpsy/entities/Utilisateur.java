@@ -1,114 +1,50 @@
 package com.cyberpsy.entities;
+ 
 
-import java.util.Date;
+import java.sql.Date;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "Utilisateur")
+@Table(name = "utilisateur", schema = "dbo")
+@Getter
+@Setter
+@Builder(toBuilder = true)
+
 public class Utilisateur {
 
     @Id
-    @Column(name = "ID_Utilisateur")
+    @Column(name = "id_utilisateur")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idUtilisateur;
+    private int idUtilisateur;
 
-    @Column(name = "Nom", nullable = false)
+    @Column(name = "nom")
     private String nom;
 
-    @Column(name = "Prenom", nullable = false)
+    @Column(name = "prenom")
     private String prenom;
 
-    @Column(name = "Email", nullable = false, unique = true)
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "Mot_De_Passe", nullable = false)
+    @Column(name = "mot_de_passe")
     private String motDePasse;
 
-    @Column(name = "Date_Inscription")
+    @Column(name = "date_inscription")
     @Temporal(TemporalType.DATE)
     private Date dateInscription;
 
-    @Column(name = "Role", nullable = false)
+    @Column(name = "role")
     private String role;
 
-    @Column(name = "Niveau_Utilisateur", nullable = false)
+    @Column(name = "niveau_utilisateur")
     private Integer niveauUtilisateur;
 
-    @Column(name = "Date_Activation")
+    @Column(name = "date_activation")
     @Temporal(TemporalType.DATE)
-    private Date dateActivation;
+    private Date derniereActivite;
 
-    // Getters and Setters
-    public Integer getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Integer idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
-
-    public String getNom() {
-        return nom;
-    }
-
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
-    public String getPrenom() {
-        return prenom;
-    }
-
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getMotDePasse() {
-        return motDePasse;
-    }
-
-    public void setMotDePasse(String motDePasse) {
-        this.motDePasse = motDePasse;
-    }
-
-    public Date getDateInscription() {
-        return dateInscription;
-    }
-
-    public void setDateInscription(Date dateInscription) {
-        this.dateInscription = dateInscription;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public Integer getNiveauUtilisateur() {
-        return niveauUtilisateur;
-    }
-
-    public void setNiveauUtilisateur(Integer niveauUtilisateur) {
-        this.niveauUtilisateur = niveauUtilisateur;
-    }
-
-    public Date getDateActivation() {
-        return dateActivation;
-    }
-
-    public void setDateActivation(Date dateActivation) {
-        this.dateActivation = dateActivation;
-    }
 }
