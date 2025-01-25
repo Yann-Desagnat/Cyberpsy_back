@@ -4,9 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cyberpsy.entities.Utilisateur;
+import com.cyberpsy.input.SignInInput;
 import com.cyberpsy.input.SignUpInput;
 import com.cyberpsy.interfaces.UtilisateurRepository;
-import com.cyberpsy.reponses.SignUpReponse;
+import com.cyberpsy.reponses.ReponseUtilisateur;
 import com.cyberpsy.service.UtilisateurService;
 
 import jakarta.transaction.Transactional;
@@ -34,9 +35,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public SignUpReponse createReponseSignUp(Utilisateur savedUtilisateur) {
+    public ReponseUtilisateur createReponseSignUp(Utilisateur savedUtilisateur) {
         int idUser = utilisateurRepository.findIdByEmail(savedUtilisateur.getEmail());
-        SignUpReponse signUpReponse = SignUpReponse.builder()
+        ReponseUtilisateur signUpReponse = ReponseUtilisateur.builder()
             .id(idUser)
             .nom(savedUtilisateur.getNom())
             .prenom(savedUtilisateur.getPrenom())
@@ -50,5 +51,13 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return signUpReponse;
     }
 
-    
+    @Override
+    public Boolean verifyPasswordAndEmail(SignInInput signInInput){
+        if(utilisateurRepository.verifyUser(signInInput.getEmail(), signInInput.getPassword()) == true){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }

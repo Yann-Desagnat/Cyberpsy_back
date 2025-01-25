@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @Builder(toBuilder = true)
 
-public class SignUpReponse {
+public class ReponseUtilisateur {
     private int id;
     private String prenom;
     private String nom;

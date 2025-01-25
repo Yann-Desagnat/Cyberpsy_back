@@ -1,12 +1,15 @@
 package com.cyberpsy.service;
 
 import com.cyberpsy.entities.Utilisateur;
+import com.cyberpsy.input.SignInInput;
 import com.cyberpsy.input.SignUpInput;
-import com.cyberpsy.reponses.SignUpReponse;
+import com.cyberpsy.reponses.ReponseUtilisateur;
 
 public interface UtilisateurService {
     Utilisateur createUserEntity(SignUpInput signUpInput);
 
-    SignUpReponse createReponseSignUp(Utilisateur savedUtilisateur);
+    ReponseUtilisateur createReponseSignUp(Utilisateur savedUtilisateur);
+
+    Boolean verifyPasswordAndEmail(SignInInput signInInput);
 
 }
