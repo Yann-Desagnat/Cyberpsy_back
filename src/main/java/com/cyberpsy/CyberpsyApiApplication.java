@@ -12,5 +12,4 @@ public class CyberpsyApiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CyberpsyApiApplication.class, args);
 	}
-
 }

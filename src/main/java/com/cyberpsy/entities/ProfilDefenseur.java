@@ -6,26 +6,27 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Table(name = "qcm", schema = "dbo")
 @Entity
-public class Qcm {
+@Table(name = "profil_defenseur", schema = "dbo")
+public class ProfilDefenseur {
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_qcm")
-    private int idQcm;
+    @Column(name = "id_profil_defenseur")
+    private Integer idProfilDefenseur;
 
-    @Column(name = "question")
-    private String question;
+    @Column(name = "nom")
+    private String nom;
 
-    @Column(name = "niveau")
-    private int niveau;
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "description")
+    private String description;
+
 }

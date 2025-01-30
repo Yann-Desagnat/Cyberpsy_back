@@ -1,5 +1,8 @@
 package com.cyberpsy.interfaces;
 
+
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,9 +19,10 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Intege
     @Query("SELECT COUNT(u) > 0 FROM Utilisateur u WHERE u.email = :email")
     boolean existsByEmail(@Param("email") String email);
 
-    @Query("SELECT COUNT(u) > 0 FROM Utilisateur u WHERE u.email = :email and u.mot_de_passe = :password")
-    boolean verifyUser(@Param("email") String email, @Param("password") String password);
+    @Query("SELECT u FROM Utilisateur u WHERE u.email = :email")
+    Optional<Utilisateur> findByEmail(@Param("email") String email);
 
-    @Query("SELECT u FROM User u WHERE u.email = :email")
-    Utilisateur findByEmail(@Param("email") String email);
+    
+
+    /*boolean existsByEmail(String email);/* */
 }

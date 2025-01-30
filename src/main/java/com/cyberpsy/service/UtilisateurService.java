@@ -10,6 +10,5 @@ public interface UtilisateurService {
 
     ReponseUtilisateur createReponseSignUp(Utilisateur savedUtilisateur);
 
-    Boolean verifyPasswordAndEmail(SignInInput signInInput);
 
 }

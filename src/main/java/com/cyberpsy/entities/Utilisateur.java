@@ -4,8 +4,10 @@ package com.cyberpsy.entities;
 import java.sql.Date;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -13,7 +15,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-
+@NoArgsConstructor
+@AllArgsConstructor
 public class Utilisateur {
 
     @Id
@@ -27,7 +30,7 @@ public class Utilisateur {
     @Column(name = "prenom")
     private String prenom;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "mot_de_passe")

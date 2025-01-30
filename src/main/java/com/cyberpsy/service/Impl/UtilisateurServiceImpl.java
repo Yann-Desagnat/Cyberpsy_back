@@ -1,6 +1,7 @@
 package com.cyberpsy.service.Impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cyberpsy.entities.Utilisateur;
@@ -19,13 +20,16 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public Utilisateur createUserEntity(SignUpInput signUpInput) {
         Utilisateur newUser = Utilisateur.builder()
             .nom(signUpInput.getNom())
             .prenom(signUpInput.getPrenom())
             .email(signUpInput.getEmail())
-            .motDePasse(signUpInput.getMotDePasse())
+            .motDePasse(passwordEncoder.encode(signUpInput.getMotDePasse()))
             .derniereActivite(signUpInput.getDerniereActivite())
             .niveauUtilisateur(signUpInput.getNiveauUtilisateur())
             .role(signUpInput.getRole())
@@ -51,13 +55,5 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return signUpReponse;
     }
 
-    @Override
-    public Boolean verifyPasswordAndEmail(SignInInput signInInput){
-        if(utilisateurRepository.verifyUser(signInInput.getEmail(), signInInput.getPassword()) == true){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
+    
 }
