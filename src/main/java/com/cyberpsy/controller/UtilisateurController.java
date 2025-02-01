@@ -88,6 +88,11 @@ public class UtilisateurController {
         userDetails.put("email", user.getEmail());
         userDetails.put("prenom", user.getPrenom());
         userDetails.put("nom", user.getNom());
+        userDetails.put("idUtilisateur", user.getIdUtilisateur());
+        userDetails.put("derniereActivite", user.getDerniereActivite());
+        userDetails.put("niveauUtilisateur", user.getNiveauUtilisateur());
+        userDetails.put("role", user.getRole());
+
 
         return ResponseEntity.ok(userDetails);
     }
