@@ -1,102 +1,123 @@
 package com.cyberpsy.controller;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.cyberpsy.interfaces.QcmRepository;
-import com.cyberpsy.interfaces.ReponseQcmRepository;
+import com.cyberpsy.dto.ReponseSubmissionDTO;
+import com.cyberpsy.entities.HistoriqueQuestionQcm;
 import com.cyberpsy.entities.Qcm;
 import com.cyberpsy.entities.ReponseQcm;
+import com.cyberpsy.interfaces.HistoriqueQcmRepository;
+import com.cyberpsy.interfaces.QcmRepository;
+import com.cyberpsy.interfaces.ReponseQcmRepository;
 
+import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/qcm")
+@Validated
 public class QcmController {
-@Autowired
+
+    @Autowired
     private QcmRepository qcmRepository;
+
+    @Autowired
     private ReponseQcmRepository reponseQcmRepository;
 
-    // Get all QCM records
-    @GetMapping("/qcm")
-    public ResponseEntity<List<Qcm>> getAllQcm() {
-        List<Qcm> qcms = qcmRepository.findAll();
-        return ResponseEntity.ok(qcms);
+    @Autowired
+    private HistoriqueQcmRepository historiqueQcmRepository;
+
+    /**
+     * ✅ Récupérer les questions du QCM par niveau avec la bonne réponse
+     */
+    @GetMapping("/niveau/{niveau}")
+    public ResponseEntity<List<Map<String, Object>>> getByLevel(
+        @PathVariable int niveau,
+        @RequestHeader("Authorization") String token) {
+
+        List<Qcm> questions = qcmRepository.findByNiveau(niveau);
+        List<Map<String, Object>> response = questions.stream().map(q -> {
+            Map<String, Object> questionData = new HashMap<>();
+            questionData.put("idQcm", q.getIdQcm());
+            questionData.put("question", q.getQuestion());
+            questionData.put("options", List.of("Vrai", "Faux"));
+
+            // ✅ Récupérer la vraie réponse correcte et non la source
+            Optional<ReponseQcm> correctAnswer = reponseQcmRepository.findByQcmIdQcmAndEstCorrect(q.getIdQcm(), true);
+            questionData.put("correctAnswer", correctAnswer.map(ReponseQcm::getReponse).orElse("Bonne réponse non disponible"));
+
+            questionData.put("source", q.getSource()); // Source gardée pour référence
+            questionData.put("niveau", q.getNiveau());
+
+            return questionData;
+        }).toList();
+
+        return ResponseEntity.ok(response);
     }
 
-    // Get a single QCM by ID
-    @GetMapping("qcm/{id}")
-    public ResponseEntity<Qcm> getQcmById(@PathVariable int id) {
-        Optional<Qcm> qcm = qcmRepository.findById(id);
-        return qcm.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-    }
+    /**
+     * ✅ Soumettre la réponse d'un utilisateur et vérifier si elle est correcte
+     */
+    @PostMapping("/submit")
+    @Transactional
+    public ResponseEntity<?> submitResponse(@RequestBody @Valid ReponseSubmissionDTO submission) {
+        try {
+            // 🔹 Vérifier si la question existe
+            Qcm qcm = qcmRepository.findById(submission.getIdQcm())
+                      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "QCM non trouvé avec l'ID : " + submission.getIdQcm()));
 
-    // Add a new QCM
-    @PostMapping("/qcm")
-    public ResponseEntity<Qcm> createQcm(@RequestBody Qcm qcm) {
-        Qcm savedQcm = qcmRepository.save(qcm);
-        return ResponseEntity.ok(savedQcm);
-    }
+            // 🔹 Récupérer la vraie bonne réponse
+            Optional<ReponseQcm> correctResponse = reponseQcmRepository.findByQcmIdQcmAndEstCorrect(submission.getIdQcm(), true);
+            
+            if (!correctResponse.isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", "Aucune réponse correcte trouvée pour ce QCM"
+                ));
+            }
 
-    // Update an existing QCM
-    @PutMapping("/qcm/{id}")
-    public ResponseEntity<Qcm> updateQcm(@PathVariable int id, @RequestBody Qcm updatedQcm) {
-        Optional<Qcm> existingQcm = qcmRepository.findById(id);
+            boolean isCorrect = submission.getReponse().trim().equalsIgnoreCase(correctResponse.get().getReponse().trim());
 
-        if (existingQcm.isPresent()) {
-            Qcm qcm = existingQcm.get();
-            qcm.setQuestion(updatedQcm.getQuestion());
-            qcm.setNiveau(updatedQcm.getNiveau());
-            Qcm savedQcm = qcmRepository.save(qcm);
-            return ResponseEntity.ok(savedQcm);
-        } else {
-            return ResponseEntity.notFound().build();
+            // 🔹 Enregistrer la réponse de l'utilisateur dans l'historique
+            HistoriqueQuestionQcm historique = new HistoriqueQuestionQcm();
+            historique.setQcm(qcm);
+            historique.setIdUser(submission.getIdUser());
+            historique.setDateReponse(LocalDateTime.now());
+            historique.setCorrect(isCorrect ? "true" : "false");
+            historiqueQcmRepository.save(historique);
+
+            Map<String, Object> response = new HashMap<>();
+response.put("status", "success");
+response.put("isCorrect", isCorrect);
+response.put("userResponse", submission.getReponse());
+response.put("correctAnswer", correctResponse.get().getReponse());
+response.put("source", qcm.getSource());
+
+return ResponseEntity.ok(response);
+
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "status", "error",
+                "message", e.getMessage()
+            ));
         }
     }
-
-    // Delete a QCM by ID
-    @DeleteMapping("/qcm/{id}")
-    public ResponseEntity<Void> deleteQcm(@PathVariable int id) {
-        if (qcmRepository.existsById(id)) {
-            qcmRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping("reponseqcm")
-    public ResponseEntity<ReponseQcm> createResponseQcm(@RequestBody ReponseQcm reponseQcm) {
-        ReponseQcm savedReponse = reponseQcmRepository.save(reponseQcm);
-        return ResponseEntity.ok(savedReponse);
-    }
-
-    // Update an existing QCM
-    @PutMapping("reponseqcm/{id}")
-    public ResponseEntity<ReponseQcm> updateResponseQcm(@PathVariable int id, @RequestBody ReponseQcm updatedReponseQcm) {
-        Optional<ReponseQcm> existingReponseQcm = reponseQcmRepository.findById(id);
-
-        if (existingReponseQcm.isPresent()) {
-            ReponseQcm reponseQcm = existingReponseQcm.get();
-            reponseQcm.setResponse(updatedReponseQcm.getResponse());
-            reponseQcm.setCorrect(updatedReponseQcm.isCorrect());
-            ReponseQcm savedReponseQcm = reponseQcmRepository.save(reponseQcm);
-            return ResponseEntity.ok(savedReponseQcm);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
- /*  @PostMapping("/historiqueqcm")
-    public*/
 }
