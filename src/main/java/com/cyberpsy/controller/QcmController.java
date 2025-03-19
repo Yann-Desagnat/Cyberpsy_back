@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,10 +46,15 @@ public class QcmController {
     /**
      * ✅ Récupérer les questions du QCM par niveau avec la bonne réponse
      */
-    @GetMapping("/niveau/{niveau}")
+
+
+   /*  @GetMapping("/niveau/{niveau}")
     public ResponseEntity<List<Map<String, Object>>> getByLevel(
         @PathVariable int niveau,
-        @RequestHeader("Authorization") String token) {
+        
+        @RequestHeader("Authorization") String token) */
+        @GetMapping("/niveau/{niveau}")
+public ResponseEntity<List<Map<String, Object>>> getByLevel(@PathVariable int niveau) {
 
         List<Qcm> questions = qcmRepository.findByNiveau(niveau);
         List<Map<String, Object>> response = questions.stream().map(q -> {
@@ -93,6 +97,7 @@ public class QcmController {
                 ));
             }
 
+        
             boolean isCorrect = submission.getReponse().trim().equalsIgnoreCase(correctResponse.get().getReponse().trim());
 
             // 🔹 Enregistrer la réponse de l'utilisateur dans l'historique

@@ -67,11 +67,11 @@ public class Qcm {
         this.reponse = reponse;
     }
 
-    public boolean isEstCorrect() {
+    public Boolean isEstCorrect() {
         return estCorrect;
     }
 
-    public void setEstCorrect(boolean estCorrect) {
+    public void setEstCorrect(Boolean estCorrect) {
         this.estCorrect = estCorrect;
     }
 
