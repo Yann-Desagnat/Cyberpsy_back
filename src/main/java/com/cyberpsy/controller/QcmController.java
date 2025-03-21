@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ import com.cyberpsy.entities.ReponseQcm;
 import com.cyberpsy.interfaces.HistoriqueQcmRepository;
 import com.cyberpsy.interfaces.QcmRepository;
 import com.cyberpsy.interfaces.ReponseQcmRepository;
+import com.cyberpsy.reponses.HistoriqueQuestionQcmReponse;
 
 import jakarta.validation.Valid;
 
@@ -124,5 +126,25 @@ return ResponseEntity.ok(response);
                 "message", e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("/historique/{id}")
+    public ResponseEntity<List<HistoriqueQuestionQcmReponse>> getHistoriqueById(@PathVariable int id) {
+        List<HistoriqueQuestionQcm> historiqueList = historiqueQcmRepository.findByIdUser(id);
+
+        if (historiqueList.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Convert HistoriqueQuestionQcm to HistoriqueQuestionQcmReponse
+        List<HistoriqueQuestionQcmReponse> responseList = historiqueList.stream()
+            .map(historique -> HistoriqueQuestionQcmReponse.builder()
+                .qcm(historique.getQcm())
+                .dateReponse(historique.getDateReponse())
+                .correct(historique.getCorrect())
+                .build()
+            ).collect(Collectors.toList());
+
+        return ResponseEntity.ok(responseList);
     }
 }
