@@ -54,7 +54,7 @@ public class QcmController {
         
         @RequestHeader("Authorization") String token) */
         @GetMapping("/niveau/{niveau}")
-public ResponseEntity<List<Map<String, Object>>> getByLevel(@PathVariable int niveau) {
+public ResponseEntity<List<Map<String, Object>>> getByLevel(@PathVariable  int niveau) {
 
         List<Qcm> questions = qcmRepository.findByNiveau(niveau);
         List<Map<String, Object>> response = questions.stream().map(q -> {
