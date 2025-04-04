@@ -71,7 +71,7 @@ public class WebSecurityConfig {
             )
             .authorizeHttpRequests(authorizeRequests ->
                     authorizeRequests
-                        .requestMatchers("/api/auth/**", "/api/qcm/submit/**", "/api/test/all","/api/qcm/niveau/**").permitAll() // Permet d'accéder à ces requêtes sans authentification
+                        .requestMatchers("/api/auth/**", "/api/qcm/submit/**", "/api/test/all","/api/qcm/niveau/**","/api/qcm/historique/**").permitAll() // Permet d'accéder à ces requêtes sans authentification
                         .anyRequest().authenticated() /// Authentification nécessaire pour les autres requêtes
      
             )
